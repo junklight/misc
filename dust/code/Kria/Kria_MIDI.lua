@@ -7,15 +7,24 @@
 --
 
 -- don't need an engine 
--- so just select testsine for now
-engine.name = "TestSine"
+-- but it seems to do a sine noise 
+-- if you don't specifiy one
+-- engine.name = "ack"
 
-local kria = require 'ansible/kria'
+local kria = require 'Kria/lib/kria'
 local BeatClock = require 'beatclock'
 local clk = BeatClock.new()
+local clk_midi = midi.connect()
+clk_midi.event = function(data)
+  clk:process_midi(data)
+end
+
+local options = {}
+options.STEP_LENGTH_NAMES = {"1 bar", "1/2", "1/3", "1/4", "1/6", "1/8", "1/12", "1/16", "1/24", "1/32", "1/48", "1/64"}
+options.STEP_LENGTH_DIVIDERS = {1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64}
 
 local g = grid.connect(1)
-function g.event(x,y,z) gridkey(x,y,z) end
+function g.key(x,y,z) gridkey(x,y,z) end
 local k
 
 local preset_mode = false
@@ -50,19 +59,25 @@ function make_note(track,n,oct,dur,tmul,rpt,glide)
 		-- ignore repeats and glide for now 
 		-- currently 1 == C3 (60 = 59 + 1) 
 		midi_note = (59 + n) + ( (oct - 3) * 12 ) 
-		m.note_on(midi_note,100,midich)
+		m:note_on(midi_note,100,midich)
 		table.insert(note_off_list,{ timestamp = clock_count + (dur * tmul) , channel = midich , note = midi_note }) 
 end
 
 
 function init() 
-	k = kria.loadornew("ansible/kria.data")
+	k = kria.loadornew("Kria/kria.data")
 	--k = kria.new()
   k:init(make_note)
   clk.on_step = step
   clk.on_select_internal = function() clk:start() end
   -- clk.on_select_external = reset_pattern
 	clk:add_clock_params()
+	params:add{type = "option", id = "step_length", name = "step length", options = options.STEP_LENGTH_NAMES, default = 6,
+    action = function(value)
+      clk.ticks_per_step = 96 / options.STEP_LENGTH_DIVIDERS[value]
+      clk.steps_per_beat = options.STEP_LENGTH_DIVIDERS[value] / 4
+      clk:bpm_change(clk.bpm)
+    end}
 	params:add_separator()
 	params:add{type="option",name="Note Sync",id="note_sync",options={"Off","On"},default=2, action=nsync}
 	params:add{type="option",name="Loop Sync",id="loop_sync",options={"None","Track","All"},default=1, action=lsync}
@@ -74,7 +89,7 @@ function init()
 	params:add_number("clock_ticks", "clock ticks", 1, 96,1)
   params:bang()
   -- grid refresh timer, 15 fps
-  metro_grid_redraw = metro.alloc(function(stage) gridredraw() end, 1 / 15)
+  metro_grid_redraw = metro.init{ event = function(stage) gridredraw() end, time = 1 / 30 }
   metro_grid_redraw:start()
 end
 
@@ -83,7 +98,7 @@ function step()
 	table.sort(note_off_list,function(a,b) return a.timestamp < b.timestamp end)
 	while note_off_list[1] ~= nil and note_off_list[1].timestamp <= clock_count do
 		print("note off " .. note_off_list[1].note)
-		m.note_off(note_off_list[1].note,0,note_off_list[1].channel)
+		m:note_off(note_off_list[1].note,0,note_off_list[1].channel)
 		table.remove(note_off_list,1)
 	end
 	if clock_count % params:get("clock_ticks") == 0 then 
@@ -135,6 +150,6 @@ end
 
 function cleanup()
 	print("Cleanup")
-	k:save("ansible/kria.data")
+	k:save("Kria/kria.data")
 	print("Done")
 end

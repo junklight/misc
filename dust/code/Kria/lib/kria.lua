@@ -9,7 +9,7 @@
 --  in other scripts
 --  see how far I get in this first go 
 
-local scales = require 'ansible/scales'
+local scales = require 'Kria/lib/scales'
 local tabutil = require 'tabutil'
 
 local function newempty(n,v)
@@ -273,14 +273,14 @@ end
 
 function kria:init(note_callback)
 	self.callback = note_callback
-  self.keytimermetro = metro.alloc(function() self:keytimer() end)
+  self.keytimermetro = metro.init{ event = function() self:keytimer() end }
   self.keytimermetro:start(0.3)
   self.blink_timers = {}
 	for idx = 1,kria.NUM_TRACKS do
-		self.blink_timers[idx] = metro.alloc(function () self.kria_blinks[idx] = 0 end )
+		self.blink_timers[idx] = metro.init{event = function () self.kria_blinks[idx] = 0 end }
 	end
 	self.blink = 1
-  self.blinker = metro.alloc(function() if self.blink == 1 then self.blink = 0 else self.blink = 1 end end )
+  self.blinker = metro.init{ event = function() if self.blink == 1 then self.blink = 0 else self.blink = 1 end end }
   self.blinker:start(0.5)
 end
 
@@ -1167,17 +1167,17 @@ kria.activeModeIndex = {
 function kria.draw_tr(k,g)
 	if k.mod_mode == kria.modTime then 
 		for idx = 1,16 do
-		   g.led(idx,2,3)
+		   g:led(idx,2,3)
 		end
-		g.led(k:p().t[k.track].tmul[kria.mTr],2,kria.L1)
+		g:led(k:p().t[k.track].tmul[kria.mTr],2,kria.L1)
 	elseif k.mod_mode == kria.modProb then 
 		for idx = 1,16 do
-		   g.led(idx,6,3)
+		   g:led(idx,6,3)
 		end
 		for idx = 1,16 do
 			 if k:p().t[k.track].p[kria.mTr][idx] > 0  then 
 					local row = 6 - k:p().t[k.track].p[kria.mTr][idx]
-					g.led(idx,row,6)	
+					g:led(idx,row,6)	
 			 end
 		end
 	else 
@@ -1212,7 +1212,7 @@ function kria.draw_tr(k,g)
 		-- onto the actual LEDs
 		for tnum = 1,4 do
 			for idx = 1,16 do
-				g.led(idx,tnum,ledbuf[tnum][idx])
+				g:led(idx,tnum,ledbuf[tnum][idx])
 			end
 		end
 	end
@@ -1230,17 +1230,17 @@ function kria.draw_note(k,g,alt)
 	end
 	if k.mod_mode == kria.modTime then 
 		for idx = 1,16 do
-		   g.led(idx,2,3)
+		   g:led(idx,2,3)
 		end
-		g.led(k:p().t[k.track].tmul[noteMode],2,kria.L1)
+		g:led(k:p().t[k.track].tmul[noteMode],2,kria.L1)
 	elseif k.mod_mode == kria.modProb then 
 		for idx = 1,16 do
-		   g.led(idx,6,3)
+		   g:led(idx,6,3)
 		end
 		for idx = 1,16 do
 			 if k:p().t[k.track].p[noteMode][idx] > 0  then 
 					local row = 6 - k:p().t[k.track].p[noteMode][idx]
-					g.led(idx,row,6)	
+					g:led(idx,row,6)	
 			 end
 		end
 	else 
@@ -1283,7 +1283,7 @@ function kria.draw_note(k,g,alt)
 		-- onto the actual LEDs
 		for ydx = 1,7 do
 			for xdx = 1,16 do
-				g.led(xdx,ydx,ledbuf[xdx][ydx])
+				g:led(xdx,ydx,ledbuf[xdx][ydx])
 			end
 		end
 
@@ -1297,17 +1297,17 @@ end
 function kria.draw_oct(k,g)
 	if k.mod_mode == kria.modTime then 
 		for idx = 1,16 do
-		   g.led(idx,2,3)
+		   g:led(idx,2,3)
 		end
-		g.led(k:p().t[k.track].tmul[kria.mOct],2,kria.L1)
+		g:led(k:p().t[k.track].tmul[kria.mOct],2,kria.L1)
 	elseif k.mod_mode == kria.modProb then 
 		for idx = 1,16 do
-		   g.led(idx,6,3)
+		   g:led(idx,6,3)
 		end
 		for idx = 1,16 do
 			 if k:p().t[k.track].p[kria.mOct][idx] > 0  then 
 					local row = 6 - k:p().t[k.track].p[kria.mOct][idx]
-					g.led(idx,row,6)	
+					g:led(idx,row,6)	
 			 end
 		end
 	else 
@@ -1348,7 +1348,7 @@ function kria.draw_oct(k,g)
 		-- onto the actual LEDs
 		for ydx = 1,7 do
 			for xdx = 1,16 do
-				g.led(xdx,ydx,ledbuf[xdx][ydx])
+				g:led(xdx,ydx,ledbuf[xdx][ydx])
 			end
 		end
 	end
@@ -1357,17 +1357,17 @@ end
 function kria.draw_dur(k,g)
 	if k.mod_mode == kria.modTime then 
 		for idx = 1,16 do
-		   g.led(idx,2,3)
+		   g:led(idx,2,3)
 		end
-		g.led(k:p().t[k.track].tmul[kria.mDur],2,kria.L1)
+		g:led(k:p().t[k.track].tmul[kria.mDur],2,kria.L1)
 	elseif k.mod_mode == kria.modProb then 
 		for idx = 1,16 do
-		   g.led(idx,6,3)
+		   g:led(idx,6,3)
 		end
 		for idx = 1,16 do
 			 if k:p().t[k.track].p[kria.mDur][idx] > 0  then 
 					local row = 6 - k:p().t[k.track].p[kria.mDur][idx]
-					g.led(idx,row,6)	
+					g:led(idx,row,6)	
 			 end
 		end
 	else 
@@ -1410,7 +1410,7 @@ function kria.draw_dur(k,g)
 		-- onto the actual LEDs
 		for ydx = 1,7 do
 			for xdx = 1,16 do
-				g.led(xdx,ydx,ledbuf[xdx][ydx])
+				g:led(xdx,ydx,ledbuf[xdx][ydx])
 			end
 		end
 	end
@@ -1419,17 +1419,17 @@ end
 function kria.draw_rpt(k,g)
 	if k.mod_mode == kria.modTime then 
 		for idx = 1,16 do
-		   g.led(idx,2,3)
+		   g:led(idx,2,3)
 		end
-		g.led(k:p().t[k.track].tmul[kria.mRpt],2,kria.L1)
+		g:led(k:p().t[k.track].tmul[kria.mRpt],2,kria.L1)
 	elseif k.mod_mode == kria.modProb then 
 		for idx = 1,16 do
-		   g.led(idx,6,3)
+		   g:led(idx,6,3)
 		end
 		for idx = 1,16 do
 			 if k:p().t[k.track].p[kria.mRpt][idx] > 0  then 
 					local row = 6 - k:p().t[k.track].p[kria.mRpt][idx]
-					g.led(idx,row,6)	
+					g:led(idx,row,6)	
 			 end
 		end
 	else 
@@ -1470,7 +1470,7 @@ function kria.draw_rpt(k,g)
 		-- onto the actual LEDs
 		for ydx = 1,7 do
 			for xdx = 1,16 do
-				g.led(xdx,ydx,ledbuf[xdx][ydx])
+				g:led(xdx,ydx,ledbuf[xdx][ydx])
 			end
 		end
 	end
@@ -1479,17 +1479,17 @@ end
 function kria.draw_glide(k,g)
 	if k.mod_mode == kria.modTime then 
 		for idx = 1,16 do
-		   g.led(idx,2,3)
+		   g:led(idx,2,3)
 		end
-		g.led(k:p().t[k.track].tmul[kria.mGlide],2,kria.L1)
+		g:led(k:p().t[k.track].tmul[kria.mGlide],2,kria.L1)
 	elseif k.mod_mode == kria.modProb then 
 		for idx = 1,16 do
-		   g.led(idx,6,3)
+		   g:led(idx,6,3)
 		end
 		for idx = 1,16 do
 			 if k:p().t[k.track].p[kria.mGlide][idx] > 0  then 
 					local row = 6 - k:p().t[k.track].p[kria.mGlide][idx]
-					g.led(idx,row,6)	
+					g:led(idx,row,6)	
 			 end
 		end
 	else 
@@ -1531,7 +1531,7 @@ function kria.draw_glide(k,g)
 		-- onto the actual LEDs
 		for ydx = 1,7 do
 			for xdx = 1,16 do
-				g.led(xdx,ydx,ledbuf[xdx][ydx])
+				g:led(xdx,ydx,ledbuf[xdx][ydx])
 			end
 		end
 	end
@@ -1540,24 +1540,24 @@ end
 function kria.draw_scale(k,g)
 	-- obviously dropping the teletype clocking stuff
 	for ydx = 1,8 do
-		g.led(9,ydx,kria.L0)
+		g:led(9,ydx,kria.L0)
 	end
 	for xdx = 1,8 do
-		g.led(xdx,6,2)
-		g.led(xdx,7,2)
+		g:led(xdx,6,2)
+		g:led(xdx,7,2)
 	end
 	-- scale is 1-16 
 	if k:p().scale < 9 then
-	  g.led(k:p().scale,6,kria.L1)
+	  g:led(k:p().scale,6,kria.L1)
 	else
-	  g.led(k:p().scale - 8,7,kria.L1)
+	  g:led(k:p().scale - 8,7,kria.L1)
 	end
 	for ydx = 1,7 do 
-		g.led(8 + scales[k:p().scale][ydx],8 - ydx,kria.L1) 
+		g:led(8 + scales[k:p().scale][ydx],8 - ydx,kria.L1) 
 	end
 	for tnum = 1,kria.NUM_TRACKS do
 		if k:p().t[tnum].tr[k.pos[tnum][kria.mTr]] > 0 then
-		   g.led(8+ scales[k:p().scale][k.note[tnum] + 1 ],8 - (k.note[tnum] + 1),kria.L1 + 1 )
+		   g:led(8+ scales[k:p().scale][k.note[tnum] + 1 ],8 - (k.note[tnum] + 1),kria.L1 + 1 )
 		end
 	end
 
@@ -1570,59 +1570,59 @@ end
 function kria.draw_pattern(k,g)
 	if k.meta ~= 1 then 
 		for xdx = 1,16 do
-			g.led(xdx,1,3)
+			g:led(xdx,1,3)
 		end
-		g.led(k.pattern,1,kria.L1)
+		g:led(k.pattern,1,kria.L1)
 	else
 		-- duration bar thing
 		for xdx = 1,k.meta_steps[k.meta_pos] do
-			g.led(xdx,7,3)
+			g:led(xdx,7,3)
 		end
-		g.led(k.meta_count ,7,kria.L1)
-		g.led(k.meta_steps[k.meta_edit],7,kria.L2)
+		g:led(k.meta_count ,7,kria.L1)
+		g:led(k.meta_steps[k.meta_edit],7,kria.L2)
 		-- patterns on the top row
-		g.led(k.pattern,1,kria.L0)
-		g.led(k.meta_pat[k.meta_edit],1,kria.L1)
+		g:led(k.pattern,1,kria.L0)
+		g:led(k.meta_pat[k.meta_edit],1,kria.L1)
 		-- and then the meta sequence
 		local xpos,ypos
 		if k.meta_lswap ~= 1 then
 			for idx = k.meta_start - 1,k.meta_end - 1 do
 				xpos,ypos = kria.pat_pos(idx)
-				g.led(xpos + 1 , 3 + ypos ,3)
+				g:led(xpos + 1 , 3 + ypos ,3)
 			end
 		else
 			for idx = 0,k.meta_end do
 				xpos,ypos = kria.pat_pos(idx)
-				g.led(xpos + 1 , 3 + ypos ,3)
+				g:led(xpos + 1 , 3 + ypos ,3)
 			end
 			for idx = k.meta_start - 1,64 - k.meta_start do
 				xpos,ypos = kria.pat_pos(idx)
-				g.led(xpos + 1 , 3 + ypos ,3)
+				g:led(xpos + 1 , 3 + ypos ,3)
 			end
 		end
 		xpos,ypos = kria.pat_pos(k.meta_pos)
-		g.led(xpos ,ypos + 3,kria.L1)
+		g:led(xpos ,ypos + 3,kria.L1)
 		xpos,ypos = kria.pat_pos(k.meta_edit)
-		g.led(xpos ,ypos + 3,kria.L2)
+		g:led(xpos ,ypos + 3,kria.L2)
 		if k.meta_next > 0 then
 			xpos,ypos = kria.pat_pos(k.meta_next)
 			local brt = kria.L1
 			if k.blink == 1 then
 				brt = kria.L2
 			end
-			g.led(xpos ,ypos + 3,brt)
-			g.led(k.meta_pat[k.meta_next],1,brt)
+			g:led(xpos ,ypos + 3,brt)
+			g:led(k.meta_pat[k.meta_next],1,brt)
 		end
 	end
 	if k.cue_pat_next > 0 then
-		g.led(k.cue_pat_next,1,kria.L2)
+		g:led(k.cue_pat_next,1,kria.L2)
 	end
 	if k.mod_mode == kria.modTime then
-		g.led(k.cue_count+1,2,kria.L0)
-		g.led(k.cue_div+1,2,kria.L1)
+		g:led(k.cue_count+1,2,kria.L0)
+		g:led(k.cue_div+1,2,kria.L1)
 	else
-		g.led(k.cue_steps+1,2,kria.L0)
-		g.led(k.cue_count+1,2,kria.L1)
+		g:led(k.cue_steps+1,2,kria.L0)
+		g:led(k.cue_count+1,2,kria.L1)
 	end
 end
 
@@ -1643,33 +1643,33 @@ function kria:draw(g)
 	-- if this function is being called then preset
 	-- mode is false
 	self.preset_mode = false
-	g.all(0)
+	g:all(0)
 	-- bottom strip 
-  g.led(6,8,kria.L0)
-  g.led(7,8,kria.L0)
-  g.led(8,8,kria.L0)
-  g.led(9,8,kria.L0)
+  g:led(6,8,kria.L0)
+  g:led(7,8,kria.L0)
+  g:led(8,8,kria.L0)
+  g:led(9,8,kria.L0)
 
-  g.led(11,8,kria.L0)
-  g.led(12,8,kria.L0)
-  g.led(13,8,kria.L0)
-  g.led(15,8,kria.L0)
-  g.led(16,8,kria.L0)
+  g:led(11,8,kria.L0)
+  g:led(12,8,kria.L0)
+  g:led(13,8,kria.L0)
+  g:led(15,8,kria.L0)
+  g:led(16,8,kria.L0)
 
 	--  track 
 	for tnum = 1,kria.NUM_TRACKS do
 		if self.kria_mutes[tnum] == 1 then
 			if tnum == self.track then
-				g.led(tnum,8,kria.L1)
+				g:led(tnum,8,kria.L1)
 			else
-				g.led(tnum,8,2)
+				g:led(tnum,8,2)
 			end
 		else
 			local blink = self.kria_blinks[tnum] * 2
 			if tnum == self.track then
-				g.led(tnum,8,kria.L2 + blink)
+				g:led(tnum,8,kria.L2 + blink)
 			else
-				g.led(tnum,8,kria.L0 + blink)
+				g:led(tnum,8,kria.L0 + blink)
 			end
 		end
 	end
@@ -1677,25 +1677,25 @@ function kria:draw(g)
   local modeidx = kria.activeModeIndex[self.mode]
 	if self.mode_is_alt then 
 		if self.blink == 1 then
-			 g.led(modeidx,8,kria.L2)
+			 g:led(modeidx,8,kria.L2)
 		else
-			 g.led(modeidx,8,kria.L1)
+			 g:led(modeidx,8,kria.L1)
 		end
 	else
-	  g.led(modeidx,8,kria.L1)
+	  g:led(modeidx,8,kria.L1)
 	end
 	-- mod 
 	if self.mod_mode == kria.modLoop then 
-		g.led(11,8,kria.L1)
+		g:led(11,8,kria.L1)
 	end
 	if self.mod_mode == kria.modTime then 
-		g.led(12,8,kria.L1)
+		g:led(12,8,kria.L1)
 	end
 	if self.mod_mode == kria.modProb then 
-		g.led(13,8,kria.L1)
+		g:led(13,8,kria.L1)
 	end
 	kria.draw_pages[self.mode](self,g)
-  g.refresh()
+  g:refresh()
 end
 
 function kria:calc_scale(x)
@@ -1719,20 +1719,20 @@ function kria:draw_presets(g)
 	-- if this function is being called then preset
 	-- mode is true
 	self.preset_mode = true
-	g.all(0)
+	g:all(0)
 	-- I want the out of use presets 
 	-- to be dimly glowing 
 	for idx = 1,8 do
-		g.led(1,idx,3)
+		g:led(1,idx,3)
 	end
-	g.led(1,self.preset,11)
+	g:led(1,self.preset,11)
 	for xdx = 1,8 do 
 		for ydx = 1,8 do 
 			local brt = self:k().glyph[xdx][ydx] * 13
-			g.led(xdx + 8,ydx,brt)
+			g:led(xdx + 8,ydx,brt)
 		end
 	end
-	g.refresh()
+	g:refresh()
 end
 
 
@@ -1743,7 +1743,7 @@ end
 
 function kria.loadornew(fname)
 	local ret
-  ret = tabutil.load(data_dir .. fname)
+  ret = tabutil.load( _path.data .. fname)
 	if ret == nil then
 		ret = kria.new()
 	else
